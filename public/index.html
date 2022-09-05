@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://vjs.zencdn.net/7.17.0/video-js.css" rel="stylesheet" />
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+
+    <div id="app"></div>
+
+    <script type="text/babel">
+    function App() {
+
+      const [dir, setDir] = React.useState([])
+      const [files, setFiles] = React.useState([])
+      const [selectedFile, setSelectedFile] = React.useState("")
+      const [currentPath, setCurrentPath] = React.useState('/')
+      const [currentPathArray, setCurrentPathArray] = React.useState([])
+      const [prevPath, setPrevPath] = React.useState('')
+      const [currentFolder, setCurrentFolder] = React.useState('')
+
+      React.useEffect(()=> {
+          fetch('/api/')
+              .then((res) => res.json())
+              .then(res => {
+                  setDir(res.dir)
+                  setFiles(res.files)
+              });
+      }, []);
+
+      const fileSelectHandle = (fileName) => {
+        setSelectedFile(currentPathArray.join('/')+'/'+fileName)
+
+        var myVideo = document.getElementById("video1"); 
+        myVideo.load();
+      }
+
+      const folderSelectHandle = (folderName) => {
+        currentPathArray.push(folderName)
+        setCurrentPathArray(currentPathArray)
+        setCurrentPath((prev) => prev + '/'+folderName)
+        setCurrentFolder(folderName)
+        localStorage.setItem('current_path', currentPath+'/'+folderName)
+        
+        fetch('/api/get-file/'+encodeURIComponent(currentPathArray.join('/')))
+              .then((res) => res.json())
+              .then(res => {
+                  setDir(res.dir)
+                  setFiles(res.files)
+              });
+      }
+
+      React.useEffect(()=>{
+        console.log(currentPathArray)
+      }, [currentPath])
+
+      const deleteFile = (fileName) => {
+        if(confirm('asdasd')){
+          console.log(fileName);
+        }
+      }
+
+      const folderBack = () => {
+        let current_path_split = currentPath.split('/')
+        let current_f = current_path_split[current_path_split.length-1];
+        if(current_f===""){
+          current_f = current_path_split[current_path_split.length-2];
+        }
+
+        currentPathArray.pop();
+        setCurrentPathArray(currentPathArray);
+        console.log(currentPathArray.join('/'))
+        let aaa = currentPath.replace(current_f, '');
+        let bbb;
+        if(currentPathArray.length==0){
+          bbb = '/'
+        }else{
+          bbb = currentPathArray.join('/')
+        }
+        fetch('/api/get-file/'+encodeURIComponent(bbb))
+              .then((res) => res.json())
+              .then(res => {
+                  setDir(res.dir)
+                  setFiles(res.files)
+              });
+
+        setCurrentPath(aaa)
+
+      }
+
+      const getFileThumb = (fileName) => {
+        if(currentPathArray.join('/')==""){
+          return '/api/file-thumbnail/'+encodeURIComponent('/')+'/'+fileName
+        }else{
+          return '/api/file-thumbnail/'+encodeURIComponent(currentPathArray.join('/'))+'/'+fileName
+        }
+        
+      }
+          
+      return (
+          <div>
+            {selectedFile!=="" &&
+            <video id="video1" style={{width:'100%'}} controls>
+              <source src={'/api/file-stream/'+encodeURIComponent(selectedFile) } type="video/mp4"/>
+              Your browser does not support the video tag.
+            </video>
+            }
+            
+            <div style={{width:''}}>
+
+              <div style={{display:'flex', flexWrap:'wrap'}}>
+                  <div onClick={() => folderBack()} style={{width:'200px'}}>
+                    <img src="/folder_Icon.png" width="200"/>
+                    <p style={{wordWrap:'break-word'}}>Back</p>
+                  </div>
+                {dir.map((val, key) => (
+                  <div key={key} onClick={() => folderSelectHandle(val)} style={{width:'200px'}}>
+                    <img src="/folder_Icon.png" width="200"/>
+                    <p style={{wordWrap:'break-word'}}>{val}</p>
+                  </div>
+                ))}
+                {files.map((val, key) => (
+                  <div style={{width:'200px', margin:'10px', wordWrap:'break-word'}}>
+                    <div key={key} onClick={() => fileSelectHandle(val.fileName)}>
+                      <img src={getFileThumb(val.fileName) } width="200"/>
+                      <p>{val.fileName}</p>
+                    </div>
+                    
+                    <button onClick={() => deleteFile(val.fileName)}>Delete</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+          
+          </div>);
+    }
+
+    ReactDOM.render(<App />, document.getElementById('app'))
+    </script>
+    <script src="https://vjs.zencdn.net/7.17.0/video.min.js"></script>
+  </body>
+</html>
