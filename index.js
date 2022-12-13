@@ -4,9 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const fileType = require('file-type');
 const ffmpeg = require('fluent-ffmpeg');
+const multer = require('multer');
 
 const port = 3000;
 
+app.use(express.json());
 app.use(express.static("public"));
 
 //set Base path
@@ -85,6 +87,7 @@ app.get('/api/file-stream/:fileName', async (req, res) => {
     //         console.log(err)
     //     })
     //     .saveToFile('o.mp4')
+    console.log(base_path+'/'+req.params.fileName);
     return res.sendFile(base_path+'/'+req.params.fileName);
 })
 
@@ -94,6 +97,32 @@ app.get('/api/file-thumbnail/:folderPath/:fileName', async (req, res) => {
     }
 
     return res.sendFile(__dirname+'/cache/'+req.params.fileName+'.png')
+})
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        console.log(req.params)
+        const path = `${base_path}/${req.params.path}`
+        fs.mkdirSync(path, { recursive: true })
+        return cb(null, path)
+    },
+    filename: function (req, file, cb) {
+        console.log(file)
+      cb(null,  file.originalname);
+    },
+  });
+  
+const diskStorage = multer({ storage: storage });
+  
+
+app.post('/api/file-upload/:path', diskStorage.single('file'), async (req, res) => {
+    res.send('asd')
+})
+
+app.post('/api/create-folder/:path', async (req, res) => {
+    console.log(base_path+'/'+req.params.path+'/'+req.body.folderName);
+    fs.mkdirSync(base_path+'/'+req.params.path+'/'+req.body.folderName);
+    res.send('asd')
 })
 
 app.listen(port,() => {
