@@ -11,8 +11,11 @@
 
     <div id="app"></div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.1/axios.min.js"></script>
     <script type="text/babel">
     function App() {
+
+      let axios = window.axios;
 
       const [dir, setDir] = React.useState([])
       const [files, setFiles] = React.useState([])
@@ -21,6 +24,7 @@
       const [currentPathArray, setCurrentPathArray] = React.useState([])
       const [prevPath, setPrevPath] = React.useState('')
       const [currentFolder, setCurrentFolder] = React.useState('')
+      const [uploadProgress, setUploadProgress] = React.useState('')
 
       React.useEffect(()=> {
           fetch('/api/')
@@ -99,9 +103,43 @@
         }
         
       }
+
+      function formatBytes(bytes, decimals = 2) {
+          if (!+bytes) return '0 Bytes'
+
+          const k = 1024
+          const dm = decimals < 0 ? 0 : decimals
+          const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+
+          const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+          return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+      }
+
+      const uploadFiles = async() => {
+          let file = document.getElementById('file');
+
+          const data = new FormData();
+          data.append("file", file.files[0]);
+
+          axios.post(`/api/file-upload/${encodeURIComponent(currentPathArray.join('/')) !=='' ? encodeURIComponent(currentPathArray.join('/')) : encodeURIComponent('/')}`, data, {
+              headers: {
+                'Content-Type': 'multipart/form-data'
+              },
+              onUploadProgress: (progressEvent) => {
+                setUploadProgress(formatBytes(progressEvent.loaded))
+                console.log(formatBytes(progressEvent.loaded))
+              }
+          }).then((res) => {
+            setUploadProgress(0)
+          })
+
+      }
           
       return (
           <div>
+            {uploadProgress}
+            <input type="file" name="file" id="file" onChange={()=> uploadFiles()}/>
             {selectedFile!=="" &&
             <video id="video1" style={{width:'100%'}} controls>
               <source src={'/api/file-stream/'+encodeURIComponent(selectedFile) } type="video/mp4"/>
