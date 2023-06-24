@@ -6,6 +6,7 @@
     <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
 
@@ -35,11 +36,16 @@
               });
       }, []);
 
-      const fileSelectHandle = (fileName) => {
-        setSelectedFile(currentPathArray.join('/')+'/'+fileName)
+      const fileSelectHandle = (file) => {
+        if(file.fileType.mime.startsWith('image')){
+          window.open(`/api/file-stream/${encodeURIComponent(currentPathArray.join('/')+'/'+file.fileName)}`, '_blank').focus()
+        }else{
+          setSelectedFile(currentPathArray.join('/')+'/'+file.fileName)
 
-        var myVideo = document.getElementById("video1"); 
-        myVideo.load();
+          var myVideo = document.getElementById("video1"); 
+          myVideo.load();
+        }
+        
       }
 
       const folderSelectHandle = (folderName) => {
@@ -95,13 +101,16 @@
 
       }
 
-      const getFileThumb = (fileName) => {
-        if(currentPathArray.join('/')==""){
-          return '/api/file-thumbnail/'+encodeURIComponent('/')+'/'+fileName
+      const getFileThumb = (file) => {
+        if(file.fileType.mime.startsWith('image')){
+          return `/api/file-stream/${encodeURIComponent(currentPathArray.join('/')+'/'+file.fileName)}`
         }else{
-          return '/api/file-thumbnail/'+encodeURIComponent(currentPathArray.join('/'))+'/'+fileName
+          if(currentPathArray.join('/')==""){
+            return '/api/file-thumbnail/'+encodeURIComponent('/')+'/'+file.fileName
+          }else{
+            return '/api/file-thumbnail/'+encodeURIComponent(currentPathArray.join('/'))+'/'+file.fileName
+          }
         }
-        
       }
 
       function formatBytes(bytes, decimals = 2) {
@@ -141,33 +150,42 @@
             {uploadProgress}
             <input type="file" name="file" id="file" onChange={()=> uploadFiles()}/>
             {selectedFile!=="" &&
-            <video id="video1" style={{width:'100%'}} controls>
-              <source src={'/api/file-stream/'+encodeURIComponent(selectedFile) } type="video/mp4"/>
-              Your browser does not support the video tag.
-            </video>
+            <div style={{position:'relative'}}>
+              <div className="video-container">
+                <video id="video1" style={{width:'100%'}} controls>
+                  <source src={'/api/file-stream/'+encodeURIComponent(selectedFile) } type="video/mp4"/>
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </div>
+            
+            
             }
             
             <div style={{width:''}}>
 
               <div style={{display:'flex', flexWrap:'wrap'}}>
-                  <div onClick={() => folderBack()} style={{width:'200px'}}>
-                    <img src="/folder_Icon.png" width="200"/>
+                  <div onClick={() => folderBack()} class="folder-files">
+                    <img src="/folder_Icon.png"/>
                     <p style={{wordWrap:'break-word'}}>Back</p>
                   </div>
                 {dir.map((val, key) => (
-                  <div key={key} onClick={() => folderSelectHandle(val)} style={{width:'200px'}}>
-                    <img src="/folder_Icon.png" width="200"/>
+                  <div key={key} onClick={() => folderSelectHandle(val)} class="folder-files">
+                    <img src="/folder_Icon.png"/>
                     <p style={{wordWrap:'break-word'}}>{val}</p>
                   </div>
                 ))}
                 {files.map((val, key) => (
-                  <div style={{width:'200px', margin:'10px', wordWrap:'break-word'}}>
-                    <div key={key} onClick={() => fileSelectHandle(val.fileName)}>
-                      <img src={getFileThumb(val.fileName) } width="200"/>
+                  <div class="folder-files" style={{wordWrap:'break-word'}}>
+                    <div key={key} onClick={() => fileSelectHandle(val)}>
+                      <img src={getFileThumb(val) }/>
                       <p>{val.fileName}</p>
                     </div>
                     
                     <button onClick={() => deleteFile(val.fileName)}>Delete</button>
+                    <a href={'/api/file-stream/'+encodeURIComponent(val.fileName)} download>
+                      <button>Download</button>
+                    </a>
                   </div>
                 ))}
               </div>

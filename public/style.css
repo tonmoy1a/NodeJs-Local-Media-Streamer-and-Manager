@@ -1,0 +1,19 @@
+.folder-files{
+    width: 200px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.folder-files img{
+    width: 100%;
+}
+
+.video-container{
+    position: fixed;
+}
+
+@media screen and (max-width: 600px) {
+    .folder-files{
+        width: 50%;
+    }
+}
