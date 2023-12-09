@@ -12,6 +12,12 @@
     position: fixed;
 }
 
+.video-close{
+    position: absolute;
+    top: -22px;
+    right: 0;
+}
+
 @media screen and (max-width: 600px) {
     .folder-files{
         width: 50%;

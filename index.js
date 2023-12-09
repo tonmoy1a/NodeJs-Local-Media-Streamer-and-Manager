@@ -5,6 +5,7 @@ const path = require('path');
 const fileType = require('file-type');
 const ffmpeg = require('fluent-ffmpeg');
 const multer = require('multer');
+const AdmZip = require("adm-zip");
 
 const port = 3000;
 
@@ -123,6 +124,34 @@ app.post('/api/create-folder/:path', async (req, res) => {
     console.log(base_path+'/'+req.params.path+'/'+req.body.folderName);
     fs.mkdirSync(base_path+'/'+req.params.path+'/'+req.body.folderName);
     res.send('asd')
+})
+
+app.delete('/api/file-delete', async (req, res) => {
+    const file_name_with_path = base_path+req.body.fileName;
+
+    if(fs.existsSync(file_name_with_path)){
+        fs.copyFileSync(base_path+req.body.fileName, __dirname+'/trash/'+req.body.fileName)
+        console.log(base_path+req.body.fileName)
+
+        res.json('ok')
+    }
+    
+})
+
+app.post('/api/file-unzip', async (req, res) => {
+    const file_name_with_path = base_path+req.body.fileName;
+
+    if(fs.existsSync(file_name_with_path)){
+        
+        var zip = new AdmZip(file_name_with_path);
+        console.log(base_path+file_name_with_path.split('.')[0])
+        zip.extractAllTo(base_path)
+
+        res.json('ok')
+    }else{
+        res.json('file not found')
+    }
+    
 })
 
 app.listen(port,() => {
