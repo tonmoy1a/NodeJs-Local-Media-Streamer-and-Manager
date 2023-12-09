@@ -6,6 +6,8 @@ const fileType = require('file-type');
 const ffmpeg = require('fluent-ffmpeg');
 const multer = require('multer');
 const AdmZip = require("adm-zip");
+const dotenv = require('dotenv');
+dotenv.config();
 
 const port = 3000;
 
@@ -13,7 +15,7 @@ app.use(express.json());
 app.use(express.static("public"));
 
 //set Base path
-let base_path = "";
+let base_path = process.env.BASE_PATH;
 
 const getFiles = async (dir) => {
     let files = fs.readdirSync(dir);

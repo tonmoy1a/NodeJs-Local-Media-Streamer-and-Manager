@@ -186,6 +186,7 @@
                   <div key={key} onClick={() => folderSelectHandle(val)} class="folder-files">
                     <img src="/images/folder_Icon.png"/>
                     <p style={{wordWrap:'break-word'}}>{val}</p>
+                    <button onClick={() => deleteFile(val)}>Delete</button>
                   </div>
                 ))}
                 {files.map((val, key) => (
