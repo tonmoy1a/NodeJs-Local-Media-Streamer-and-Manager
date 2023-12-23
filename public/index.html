@@ -73,7 +73,14 @@
 
       const deleteFile = (fileName) => {
         if(confirm('Delete Confirmation')){
-          axios.delete('/api/file-delete', {data:{fileName:currentPathArray.join('/')+'/'+fileName}});
+          axios.delete('/api/file-delete', {data:{fileName:currentPathArray.join('/')+'/'+fileName}}).then(() => {
+            fetch('/api/get-file/'+encodeURIComponent(currentPathArray.join('/')))
+              .then((res) => res.json())
+              .then(res => {
+                  setDir(res.dir)
+                  setFiles(res.files)
+              });
+          })
         }
       }
 

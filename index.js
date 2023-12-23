@@ -132,9 +132,8 @@ app.delete('/api/file-delete', async (req, res) => {
     const file_name_with_path = base_path+req.body.fileName;
 
     if(fs.existsSync(file_name_with_path)){
-        fs.copyFileSync(base_path+req.body.fileName, __dirname+'/trash/'+req.body.fileName)
-        console.log(base_path+req.body.fileName)
-
+        fs.copyFileSync(file_name_with_path, __dirname+'/trash/'+encodeURIComponent(req.body.fileName))
+        fs.unlinkSync(file_name_with_path)
         res.json('ok')
     }
     
