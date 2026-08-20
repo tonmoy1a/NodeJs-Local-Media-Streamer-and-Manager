@@ -43,6 +43,16 @@ app.use(express.static("public"));
 //set Base path
 let base_path = process.env.BASE_PATH;
 
+if (!base_path) {
+    console.error('ERROR: BASE_PATH is not set. Set it in your .env file to the folder you want to serve.')
+    process.exit(1)
+}
+
+if (!fs.existsSync(base_path) || !fs.statSync(base_path).isDirectory()) {
+    console.error(`ERROR: BASE_PATH "${base_path}" does not exist or is not a directory.`)
+    process.exit(1)
+}
+
 const getFiles = async (dir) => {
     let files = fs.readdirSync(dir);
 
