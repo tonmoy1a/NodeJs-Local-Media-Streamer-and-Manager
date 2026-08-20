@@ -53,6 +53,10 @@ if (!fs.existsSync(base_path) || !fs.statSync(base_path).isDirectory()) {
     process.exit(1)
 }
 
+const ffmpegAvailable = checkFfmpegInstalled();
+
+const PLACEHOLDER_THUMBNAIL_PATH = path.join(__dirname, 'public', 'images', 'no-preview.svg');
+
 const getFiles = async (dir) => {
     let files = fs.readdirSync(dir);
 
@@ -131,11 +135,23 @@ app.get('/api/file-stream/:fileName', async (req, res) => {
 })
 
 app.get('/api/file-thumbnail/:folderPath/:fileName', async (req, res) => {
-    if (!fs.existsSync(__dirname+'/cache/'+req.params.fileName+'.png')) { 
-        await generateThumbnail(decodeURIComponent(req.params.folderPath)+'/'+req.params.fileName, req.params.fileName)
+    const cachedThumbnailPath = __dirname+'/cache/'+req.params.fileName+'.png';
+
+    if (fs.existsSync(cachedThumbnailPath)) {
+        return res.sendFile(cachedThumbnailPath)
     }
 
-    return res.sendFile(__dirname+'/cache/'+req.params.fileName+'.png')
+    if (!ffmpegAvailable) {
+        return res.sendFile(PLACEHOLDER_THUMBNAIL_PATH)
+    }
+
+    try {
+        await generateThumbnail(decodeURIComponent(req.params.folderPath)+'/'+req.params.fileName, req.params.fileName)
+        return res.sendFile(cachedThumbnailPath)
+    } catch (err) {
+        console.error('Thumbnail generation failed for', req.params.fileName, '-', err.message)
+        return res.sendFile(PLACEHOLDER_THUMBNAIL_PATH)
+    }
 })
 
 const storage = multer.diskStorage({
@@ -200,9 +216,10 @@ app.listen(port, '0.0.0.0', () => {
         localIps.forEach((ip) => console.log(`  http://${ip}:${port}`))
     }
 
-    if (!checkFfmpegInstalled()) {
+    if (!ffmpegAvailable) {
         console.warn('\nWARNING: ffmpeg was not found on this system.')
         console.warn('Video thumbnail generation will not work until ffmpeg is installed and available on your PATH.')
+        console.warn('A placeholder image will be shown for thumbnails instead.')
         console.warn('See: https://ffmpeg.org/download.html\n')
     }
 })
