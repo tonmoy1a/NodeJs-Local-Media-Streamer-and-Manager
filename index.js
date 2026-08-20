@@ -7,9 +7,19 @@ const ffmpeg = require('fluent-ffmpeg');
 const multer = require('multer');
 const AdmZip = require("adm-zip");
 const dotenv = require('dotenv');
+const { execSync } = require('child_process');
 dotenv.config();
 
 const port = process.env.PORT || 3000;
+
+const checkFfmpegInstalled = () => {
+    try {
+        execSync('ffmpeg -version', { stdio: 'ignore' });
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
 
 app.use(express.json());
 app.use(express.static("public"));
@@ -157,4 +167,10 @@ app.post('/api/file-unzip', async (req, res) => {
 
 app.listen(port,() => {
     console.log(`app listening at http://localhost:${port}`)
+
+    if (!checkFfmpegInstalled()) {
+        console.warn('\nWARNING: ffmpeg was not found on this system.')
+        console.warn('Video thumbnail generation will not work until ffmpeg is installed and available on your PATH.')
+        console.warn('See: https://ffmpeg.org/download.html\n')
+    }
 })
