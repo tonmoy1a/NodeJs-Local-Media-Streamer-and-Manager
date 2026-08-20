@@ -169,17 +169,13 @@
             {uploadProgress}
             <input type="file" name="file" id="file" onChange={()=> uploadFiles()}/>
             {selectedFile!=="" &&
-            <div style={{position:'relative'}}>
               <div className="video-container">
-                <video id="video1" style={{width:'100%'}} controls>
+                <video id="video1" controls>
                   <source src={'/api/file-stream/'+encodeURIComponent(selectedFile) } type="video/mp4"/>
                   Your browser does not support the video tag.
                 </video>
                 <button className="video-close" onClick={() => closeVideo()}>Close</button>
               </div>
-            </div>
-            
-            
             }
             
             <div style={{width:''}}>
