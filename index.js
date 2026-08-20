@@ -8,9 +8,25 @@ const multer = require('multer');
 const AdmZip = require("adm-zip");
 const dotenv = require('dotenv');
 const { execSync } = require('child_process');
+const os = require('os');
 dotenv.config();
 
 const port = process.env.PORT || 3000;
+
+const getLocalNetworkIps = () => {
+    const interfaces = os.networkInterfaces();
+    const ips = [];
+
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                ips.push(iface.address);
+            }
+        }
+    }
+
+    return ips;
+}
 
 const checkFfmpegInstalled = () => {
     try {
@@ -165,8 +181,14 @@ app.post('/api/file-unzip', async (req, res) => {
     
 })
 
-app.listen(port,() => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`app listening at http://localhost:${port}`)
+
+    const localIps = getLocalNetworkIps();
+    if (localIps.length > 0) {
+        console.log('Also reachable from other devices on the same network at:')
+        localIps.forEach((ip) => console.log(`  http://${ip}:${port}`))
+    }
 
     if (!checkFfmpegInstalled()) {
         console.warn('\nWARNING: ffmpeg was not found on this system.')

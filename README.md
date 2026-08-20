@@ -89,6 +89,8 @@ The app will be available at:
 http://localhost:3000
 ```
 
+On startup, the console also prints the local network address(es) (e.g. `http://192.168.1.10:3000`) so you can open the app from other devices — phones, tablets, smart TVs — on the same Wi-Fi/LAN.
+
 ### Run with Docker instead
 
 If you have [Docker](https://docs.docker.com/get-docker/) installed, you don't need Node.js or ffmpeg on your machine — just set `BASE_PATH` in `.env` to the host folder you want to serve, then:
