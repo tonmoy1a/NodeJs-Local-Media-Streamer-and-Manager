@@ -68,6 +68,7 @@ Edit `.env`:
 
 ```env
 BASE_PATH=/path/to/your/media/folder
+PORT=3000
 ```
 
 ### 4. Run the server
@@ -86,6 +87,22 @@ The app will be available at:
 
 ```
 http://localhost:3000
+```
+
+### Run with Docker instead
+
+If you have [Docker](https://docs.docker.com/get-docker/) installed, you don't need Node.js or ffmpeg on your machine — just set `BASE_PATH` in `.env` to the host folder you want to serve, then:
+
+```bash
+docker compose up -d
+```
+
+The app will be available at `http://localhost:3000` (or whatever `PORT` you set in `.env`). Generated thumbnails and deleted files are persisted to the `cache/` and `trash/` folders in the project directory.
+
+To stop it:
+
+```bash
+docker compose down
 ```
 
 ## API Overview
