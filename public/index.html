@@ -181,33 +181,44 @@
             <div style={{width:''}}>
               {currentPathArray.join('>')}
               <div style={{display:'flex', flexWrap:'wrap'}}>
+                  {currentPathArray.length > 0 &&
                   <div onClick={() => folderBack()} class="folder-files">
                     <img src="/images/folder_Icon.png"/>
                     <p style={{wordWrap:'break-word'}}>Back</p>
                   </div>
+                  }
                 {dir.map((val, key) => (
                   <div key={key} onClick={() => folderSelectHandle(val)} class="folder-files">
                     <img src="/images/folder_Icon.png"/>
                     <p style={{wordWrap:'break-word'}}>{val}</p>
-                    <button onClick={() => deleteFile(val)}>Delete</button>
+                    <div class="file-actions">
+                      <button class="icon-btn icon-btn-delete" title="Delete" onClick={(e) => { e.stopPropagation(); deleteFile(val); }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      </button>
+                    </div>
                   </div>
                 ))}
                 {files.map((val, key) => (
                   <div class="folder-files" style={{wordWrap:'break-word'}}>
-                    
+
                     <div key={key} onClick={() => fileSelectHandle(val)}>
                       <img src={getFileThumb(val) }/>
                       <p>{val.fileName}</p>
                     </div>
-                    
-                    <button onClick={() => deleteFile(val.fileName)}>Delete</button>
-                    <a href={'/api/file-stream/'+encodeURIComponent(currentPathArray.join('/')+'/'+val.fileName)} download>
-                      <button>Download</button>
-                    </a>
-                    {val.fileType?.ext=='zip' && 
-                    <button onClick={() => unzipFile(val.fileName)}>Unzip</button>
-                    }
-                    {/*<button onMouseDown={() => console.log('click')} onMouseUp={() => console.log('out')}>tap</button>*/}
+
+                    <div class="file-actions">
+                      <button class="icon-btn icon-btn-delete" title="Delete" onClick={() => deleteFile(val.fileName)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      </button>
+                      <a class="icon-btn icon-btn-download" title="Download" href={'/api/file-stream/'+encodeURIComponent(currentPathArray.join('/')+'/'+val.fileName)} download>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                      </a>
+                      {val.fileType?.ext=='zip' &&
+                      <button class="icon-btn icon-btn-unzip" title="Unzip" onClick={() => unzipFile(val.fileName)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                      </button>
+                      }
+                    </div>
                   </div>
                 ))}
               </div>
